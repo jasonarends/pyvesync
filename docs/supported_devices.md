@@ -40,6 +40,7 @@ The VeSync API supports a variety of devices. The following is a list of devices
       - [OasisMist 1000S Humidifier][pyvesync.devices.vesynchumidifier.VeSyncHumid1000S]
       - [Superior 6000S][pyvesync.devices.vesynchumidifier.VeSyncSuperior6000S] - 6L Smart Humidifier
       - [Sprout Humidifier][pyvesync.devices.vesynchumidifier.VeSyncSproutHumid]
+      - [NeoClassic 650s][pyvesync.devices.vesynchumidifier.NeoClassic650s] - 6L Smart Humidifier
 6. Fans
       - [42" Tower Fan][pyvesync.devices.vesyncfan.VeSyncTowerFan]
       - [Pedestal Fan][pyvesync.devices.vesyncfan.VeSyncPedestalFan]
@@ -100,16 +101,17 @@ these methods are used.
 
 ### Humidifiers
 
-| Device Name | Night Light | RGB Night Light | Warm Mist |
-| ------ | ----- | ----- | ----- |
-| Classic 200S | | | |
-| Classic 300S | ✔ | | |
-| Dual 200S | | | |
-| LV600S | | | ✔ |
-| OasisMist 4.5L | | ✔ | ✔ |
-| OasisMist 1000S (LUH-M101S-WEUR only) | ✔ | | |
-| Superior 6000S | | | ✔ |
-| Sprout Humidifier | ✔ | | |
+| Device Name | Night Light | RGB Night Light | Warm Mist | Night Light Color Temp |
+| ------ | ----- | ----- | ----- | ----- |
+| Classic 200S | | | | |
+| Classic 300S | ✔ | | | |
+| Dual 200S | | | | |
+| LV600S | | | ✔ | |
+| OasisMist 4.5L | | ✔ | ✔ | |
+| OasisMist 1000S (LUH-M101S-WEUR only) | ✔ | | | |
+| Superior 6000S | | | ✔ | |
+| Sprout Humidifier | ✔ | | | |
+| NeoClassic 650s | ✔ | | | ✔ |
 
 The OasisMist 4.5L (`LUH-O451S-WEU`) exposes an RGB nightlight through
 [`set_rgb_nightlight`][pyvesync.devices.vesynchumidifier.VeSyncHumid200300S.set_rgb_nightlight].
