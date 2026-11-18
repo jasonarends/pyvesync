@@ -37,7 +37,8 @@ class HumidifierState(DeviceState):
         auto_preference (int): Auto preference level.
         auto_stop_target_reached (bool): Automatic stop target reached.
         auto_target_humidity (int): Target humidity level.
-        automatic_stop_config (bool): Automatic stop configuration.
+        automatic_stop_config (bool | None): Automatic stop configuration, or None
+            if the device does not support automatic stop.
         display_set_status (str): Display set status.
         display_status (str): Display status.
         drying_mode_auto_switch (str): Drying mode auto switch status.
