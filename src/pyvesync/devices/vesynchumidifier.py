@@ -16,6 +16,8 @@ from pyvesync.const import (
     ConnectionStatus,
     DeviceStatus,
     DryingModes,
+    HumidifierFeatures,
+    HumidifierModes,
 )
 from pyvesync.models import humidifier_models as models
 from pyvesync.models.bypass_models import (
@@ -1667,7 +1669,8 @@ class NeoClassic650s(BypassV2Mixin, VeSyncHumidifier):
 
         # ** autoStopState
         # ** autoStopSwitch
-        self.state.automatic_stop_config = bool(resp_model.autoStopSwitch)
+        if HumidifierFeatures.AUTO_STOP in self.features:
+            self.state.automatic_stop_config = bool(resp_model.autoStopSwitch)
         self.state.auto_stop_target_reached = bool(resp_model.autoStopState)
 
         # ** screenSwitch
@@ -1813,8 +1816,13 @@ class NeoClassic650s(BypassV2Mixin, VeSyncHumidifier):
         if toggle is None:
             toggle = self.state.nightlight_status != DeviceStatus.ON
 
-        payload_data = {'nightLightSwitch': int(toggle)}
-        r_dict = await self.call_bypassv2_api('setNightLightStatus', payload_data)
+        # The device rejects setNightLightStatus (inner code -1); setLightStatus
+        # switches the lamp, and needs the current brightness alongside the switch.
+        payload_data = {
+            'nightLightSwitch': int(toggle),
+            'brightness': self.state.nightlight_brightness or 100,
+        }
+        r_dict = await self.call_bypassv2_api('setLightStatus', payload_data)
         r = Helpers.process_dev_response(logger, 'toggle_nightlight', self, r_dict)
         if r is None:
             return False
@@ -1851,5 +1859,72 @@ class NeoClassic650s(BypassV2Mixin, VeSyncHumidifier):
         self.state.nightlight_status = (
             DeviceStatus.ON if brightness > 0 else DeviceStatus.OFF
         )
+        self.state.connection_status = ConnectionStatus.ONLINE
+        return True
+
+    async def set_nightlight_color_temp(self, color_temp: int) -> bool:
+        """Set the nightlight color temperature and turn the nightlight on.
+
+        Args:
+            color_temp (int): Color temperature in kelvin, 1700 to 5500.
+
+        Returns:
+            bool: True if the device accepted the change; false otherwise.
+        """
+        if not self.supports_nightlight_color_temp:
+            logger.warning(
+                '%s does not support nightlight color temperature.', self.device_name
+            )
+            return False
+        if not Validators.validate_range(color_temp, 1700, 5500):
+            logger.warning('Color temperature must be between 1700 and 5500')
+            return False
+
+        payload_data = {
+            'nightLightSwitch': 1,
+            'brightness': self.state.nightlight_brightness or 100,
+            'colorTemperature': color_temp,
+        }
+        r_dict = await self.call_bypassv2_api('setLightStatus', payload_data)
+        r = Helpers.process_dev_response(
+            logger, 'set_nightlight_color_temp', self, r_dict
+        )
+        if r is None:
+            return False
+
+        self.state.nightlight_color_temp = color_temp
+        self.state.nightlight_status = DeviceStatus.ON
+        self.state.connection_status = ConnectionStatus.ONLINE
+        return True
+
+    async def set_auto_preference(self, preference: int) -> bool:
+        """Set the auto mode preference and switch the device to auto mode.
+
+        Args:
+            preference (int): A `HumidifierAutoPreference` value.
+
+        Returns:
+            bool: True if the device accepted the change; false otherwise.
+        """
+        if preference not in self.auto_preferences:
+            logger.warning(
+                'Invalid auto preference %s, must be one of %s',
+                preference,
+                self.auto_preferences,
+            )
+            return False
+
+        payload_data = {
+            'workMode': self.mist_modes[HumidifierModes.AUTO],
+            'autoPreference': int(preference),
+        }
+        r_dict = await self.call_bypassv2_api('setHumidityMode', payload_data)
+        r = Helpers.process_dev_response(logger, 'set_auto_preference', self, r_dict)
+        if r is None:
+            return False
+
+        self.state.auto_preference = int(preference)
+        self.state.mode = HumidifierModes.AUTO
+        self.state.device_status = DeviceStatus.ON
         self.state.connection_status = ConnectionStatus.ONLINE
         return True

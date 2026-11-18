@@ -8,7 +8,13 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from pyvesync.base_devices.vesyncbasedevice import DeviceState, VeSyncBaseToggleDevice
-from pyvesync.const import DeviceStatus, DryingModes, HumidifierFeatures, HumidifierModes
+from pyvesync.const import (
+    DeviceStatus,
+    DryingModes,
+    HumidifierAutoPreference,
+    HumidifierFeatures,
+    HumidifierModes,
+)
 from pyvesync.models.bypass_models import ResponseBaseModel
 
 if TYPE_CHECKING:
@@ -250,6 +256,7 @@ class VeSyncHumidifier(VeSyncBaseToggleDevice):
 
     __slots__ = (
         '_reverse_mist_modes',
+        'auto_preferences',
         'mist_levels',
         'mist_modes',
         'target_minmax',
@@ -279,6 +286,9 @@ class VeSyncHumidifier(VeSyncBaseToggleDevice):
         self.features: list[str] = feature_map.features
         self.warm_mist_levels: list[int] = feature_map.warm_mist_levels
         self.target_minmax: tuple[int, int] = feature_map.target_minmax
+        self.auto_preferences: list[HumidifierAutoPreference] = (
+            feature_map.auto_preferences
+        )
 
     @property
     def supports_warm_mist(self) -> bool:
