@@ -126,6 +126,20 @@ class TestHumidifiers(TestBase):
             ["turn_off_nightlight"],
             ["set_nightlight_brightness", {"brightness": 50}],
         ],
+        "LUH-N651S-WUS": [
+            ["turn_on_nightlight"],
+            ["turn_off_nightlight"],
+            ["set_nightlight_brightness", {"brightness": 50}],
+            ["set_nightlight_color_temp", {"color_temp": 2700}],
+            ["set_auto_preference", {"preference": 7}],
+        ],
+        "LUH-N611S-WUSR": [
+            ["turn_on_nightlight"],
+            ["turn_off_nightlight"],
+            ["set_nightlight_brightness", {"brightness": 50}],
+            ["set_nightlight_color_temp", {"color_temp": 2700}],
+            ["set_auto_preference", {"preference": 7}],
+        ],
         "LUH-O451S-WEU": [
             ["set_rgb_nightlight", {"power": True, "brightness": 100, "red": 252, "green": 50, "blue": 0}],
         ],

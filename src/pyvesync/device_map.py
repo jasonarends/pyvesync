@@ -886,6 +886,33 @@ humidifier_modules = [
         setup_entry='LUH-N651S-WUS',
         target_minmax=(20, 90),
     ),
+    HumidifierMap(
+        class_name='NeoClassic650s',
+        dev_types=['LUH-N611S-WUSR'],
+        features=[
+            HumidifierFeatures.ONOFF,
+            HumidifierFeatures.NIGHTLIGHT,
+            HumidifierFeatures.NIGHTLIGHT_BRIGHTNESS,
+            HumidifierFeatures.NIGHTLIGHT_COLOR_TEMP,
+        ],
+        mist_modes={
+            HumidifierModes.AUTO: 'autoPro',
+            HumidifierModes.SLEEP: 'sleep',
+            HumidifierModes.MANUAL: 'manual',
+        },
+        mist_levels=list(range(1, 6)),
+        auto_preferences=[
+            HumidifierAutoPreference.SMART,
+            HumidifierAutoPreference.TURBO,
+            HumidifierAutoPreference.MODERATE,
+            HumidifierAutoPreference.GENTLE,
+        ],
+        device_alias='NeoClassic Max',
+        model_display='LUH-N611S Series',
+        model_name='NeoClassic Max',
+        setup_entry='LUH-N611S-WUSR',
+        target_minmax=(20, 90),
+    ),
 ]
 """List of ['HumidifierMap'][pyvesync.device_map.HumidifierMap] configuration
 objects for humidifier devices."""

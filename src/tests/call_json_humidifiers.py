@@ -380,6 +380,35 @@ HUMIDIFIER_DETAILS: dict[str, Any] = {
         "lampSwitch": 0,
         "totalWorkTime": 0,
     },
+    "LUH-N611S-WUSR": {  # NeoClassic Max
+        "powerSwitch": int(DeviceStatus.ON),
+        "humidity": HumidifierDefaults.humidity,
+        "targetHumidity": HumidifierDefaults.target_humidity,
+        "virtualLevel": HumidifierDefaults.virtual_mist_level,
+        "mistLevel": HumidifierDefaults.mist_level,
+        "workMode": HumidifierDefaults.humidifier_mode.value,
+        "waterLacksState": int(HumidifierDefaults.water_lacks),
+        "waterTankLifted": int(HumidifierDefaults.water_tank_lifted),
+        "autoStopSwitch": int(HumidifierDefaults.auto_stop),
+        "autoStopState": int(HumidifierDefaults.auto_stop_reached),
+        "screenSwitch": int(HumidifierDefaults.display_config),
+        "screenState": int(HumidifierDefaults.display),
+        "autoPreference": int(HumidifierDefaults.auto_mode_preference),
+        "temperature": int(HumidifierDefaults.temperature),
+        "nightLight": {
+            "nightLightSwitch": int(HumidifierDefaults.nightlight_status),
+            "brightness": HumidifierDefaults.nightlight_brightness,
+            "colorTemperature": HumidifierDefaults.nightlight_color_temperature,
+            "nightLightLevel": 1,
+            "brightnessLevel2": 100
+        },
+        "scheduleCount": 0,
+        "timerRemain": 0,
+        "errorCode": 0,
+        "errorCodes": [],
+        "lampSwitch": 0,
+        "totalWorkTime": 0,
+    },
 }
 """This dictionary contains the details response for each humidifier.
 
@@ -398,6 +427,7 @@ DETAILS_RESPONSES = {
     "LUH-M101S-WEUR": build_bypass_v2_response(inner_result=HUMIDIFIER_DETAILS["LUH-M101S-WEUR"]),
     "LUH-M101S-WUS": build_bypass_v2_response(inner_result=HUMIDIFIER_DETAILS["LUH-M101-WUS"]),
     "LUH-N651S-WUS": build_bypass_v2_response(inner_result=HUMIDIFIER_DETAILS["LUH-N651S-WUS"]),
+    "LUH-N611S-WUSR": build_bypass_v2_response(inner_result=HUMIDIFIER_DETAILS["LUH-N611S-WUSR"]),
     "LEH-S601S": build_bypass_v2_response(inner_result=HUMIDIFIER_DETAILS["LEH-S601S"]),
     "LEH-B381S": build_bypass_v2_response(inner_result=HUMIDIFIER_DETAILS["LEH-B381S"]),
 }
@@ -424,6 +454,7 @@ METHOD_RESPONSES = {
     "LUH-M101S-WEUR": deepcopy(FunctionResponsesV2),
     "LUH-M101S-WUS": deepcopy(FunctionResponsesV2),
     "LUH-N651S-WUS": deepcopy(FunctionResponsesV2),
+    "LUH-N611S-WUSR": deepcopy(FunctionResponsesV2),
     "LEH-S601S": deepcopy(FunctionResponsesV2),
     "LEH-B381S": deepcopy(FunctionResponsesV2),
 }
