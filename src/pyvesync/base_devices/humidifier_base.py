@@ -115,7 +115,11 @@ class HumidifierState(DeviceState):
         super().__init__(device, details, feature_map)
         self.auto_stop_target_reached: bool = False
         self.auto_target_humidity: int | None = None
-        self.automatic_stop_config: bool = False
+        # None, not False, on models without auto stop, so callers can tell
+        # "unsupported" from "off" and not offer a control the device rejects.
+        self.automatic_stop_config: bool | None = (
+            False if HumidifierFeatures.AUTO_STOP in feature_map.features else None
+        )
         self.display_set_status: str = DeviceStatus.UNKNOWN
         self.display_status: str = DeviceStatus.UNKNOWN
         self.humidity: int | None = None
@@ -151,11 +155,12 @@ class HumidifierState(DeviceState):
         self.breathing_lamp: BreathingLampState | None = None
 
     @property
-    def automatic_stop(self) -> bool:
+    def automatic_stop(self) -> bool | None:
         """Return the automatic stop status.
 
         Returns:
-            bool: True if automatic stop is enabled, False otherwise.
+            bool | None: True if automatic stop is enabled, False if it is off,
+                or None if the device does not support automatic stop.
         """
         return self.automatic_stop_config
 
@@ -251,6 +256,8 @@ class VeSyncHumidifier(VeSyncBaseToggleDevice):
         mist_modes (list): List of mist modes.
         target_minmax (tuple): Tuple of target min and max values.
         warm_mist_levels (list): List of warm mist levels.
+        auto_preferences (list[HumidifierAutoPreference]): Auto mode preference
+            levels supported by the device.
 
     """
 
