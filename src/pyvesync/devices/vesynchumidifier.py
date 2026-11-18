@@ -37,6 +37,9 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+NEOCLASSIC_COLOR_TEMP_RANGE = (1700, 5500)
+"""Night light color temperature range in kelvin, from the VeSync app's slider."""
+
 
 class VeSyncHumid200300S(BypassV2Mixin, VeSyncHumidifier):
     """300S Humidifier Class.
@@ -1718,6 +1721,14 @@ class NeoClassic650s(BypassV2Mixin, VeSyncHumidifier):
         return True
 
     async def toggle_automatic_stop(self, toggle: bool | None = None) -> bool:
+        if HumidifierFeatures.AUTO_STOP not in self.features:
+            logger.warning(
+                '%s is a %s and does not support automatic stop.',
+                self.device_name,
+                self.device_type,
+            )
+            return False
+
         if toggle is None:
             toggle = self.state.automatic_stop_config is not True
 
@@ -1816,8 +1827,8 @@ class NeoClassic650s(BypassV2Mixin, VeSyncHumidifier):
         if toggle is None:
             toggle = self.state.nightlight_status != DeviceStatus.ON
 
-        # The device rejects setNightLightStatus (inner code -1); setLightStatus
-        # switches the lamp, and needs the current brightness alongside the switch.
+        # The device rejects setNightLightStatus (inner code -1). setLightStatus
+        # switches the lamp; brightness is sent with the switch, as the app does.
         payload_data = {
             'nightLightSwitch': int(toggle),
             'brightness': self.state.nightlight_brightness or 100,
@@ -1866,7 +1877,8 @@ class NeoClassic650s(BypassV2Mixin, VeSyncHumidifier):
         """Set the nightlight color temperature and turn the nightlight on.
 
         Args:
-            color_temp (int): Color temperature in kelvin, 1700 to 5500.
+            color_temp (int): Color temperature in kelvin, within
+                `NEOCLASSIC_COLOR_TEMP_RANGE`.
 
         Returns:
             bool: True if the device accepted the change; false otherwise.
@@ -1876,8 +1888,11 @@ class NeoClassic650s(BypassV2Mixin, VeSyncHumidifier):
                 '%s does not support nightlight color temperature.', self.device_name
             )
             return False
-        if not Validators.validate_range(color_temp, 1700, 5500):
-            logger.warning('Color temperature must be between 1700 and 5500')
+        if not Validators.validate_range(color_temp, *NEOCLASSIC_COLOR_TEMP_RANGE):
+            logger.warning(
+                'Color temperature must be between %s and %s',
+                *NEOCLASSIC_COLOR_TEMP_RANGE,
+            )
             return False
 
         payload_data = {

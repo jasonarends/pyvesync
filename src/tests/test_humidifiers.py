@@ -393,3 +393,16 @@ class TestHumidifiers(TestBase):
         assert obj.state.rgb_nightlight_red == 0
         assert obj.state.rgb_nightlight_green == 0
         assert obj.state.rgb_nightlight_blue == 0
+
+    def test_neoclassic_max_auto_stop_unsupported(self):
+        """The NeoClassic Max reports no auto stop state and sends no auto stop call."""
+        self.mock_api.return_value = (
+            call_json_humidifiers.DETAILS_RESPONSES["LUH-N611S-WUSR"],
+            200,
+        )
+        obj = self.get_device("humidifiers", "LUH-N611S-WUSR")
+        self.run_in_loop(obj.update)
+        assert obj.state.automatic_stop_config is None
+        self.mock_api.reset_mock()
+        assert self.run_in_loop(obj.toggle_automatic_stop, True) is False
+        self.mock_api.assert_not_called()
