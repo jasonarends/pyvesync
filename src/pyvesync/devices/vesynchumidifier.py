@@ -1873,12 +1873,17 @@ class NeoClassic650s(BypassV2Mixin, VeSyncHumidifier):
         self.state.connection_status = ConnectionStatus.ONLINE
         return True
 
-    async def set_nightlight_color_temp(self, color_temp: int) -> bool:
+    async def set_nightlight_color_temp(
+        self, color_temp: int, brightness: int | None = None
+    ) -> bool:
         """Set the nightlight color temperature and turn the nightlight on.
 
         Args:
             color_temp (int): Color temperature in kelvin, within
                 `NEOCLASSIC_COLOR_TEMP_RANGE`.
+            brightness (int | None): Brightness from 1 to 100 to set in the
+                same call. If None, the current brightness is kept, or 100
+                if none is known.
 
         Returns:
             bool: True if the device accepted the change; false otherwise.
@@ -1894,10 +1899,17 @@ class NeoClassic650s(BypassV2Mixin, VeSyncHumidifier):
                 *NEOCLASSIC_COLOR_TEMP_RANGE,
             )
             return False
+        if brightness is not None and not Validators.validate_range(
+            brightness, 1, 100
+        ):
+            logger.warning('Brightness must be between 1 and 100')
+            return False
+        if brightness is None:
+            brightness = self.state.nightlight_brightness or 100
 
         payload_data = {
             'nightLightSwitch': 1,
-            'brightness': self.state.nightlight_brightness or 100,
+            'brightness': brightness,
             'colorTemperature': color_temp,
         }
         r_dict = await self.call_bypassv2_api('setLightStatus', payload_data)
@@ -1908,6 +1920,7 @@ class NeoClassic650s(BypassV2Mixin, VeSyncHumidifier):
             return False
 
         self.state.nightlight_color_temp = color_temp
+        self.state.nightlight_brightness = brightness
         self.state.nightlight_status = DeviceStatus.ON
         self.state.connection_status = ConnectionStatus.ONLINE
         return True

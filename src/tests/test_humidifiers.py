@@ -406,3 +406,25 @@ class TestHumidifiers(TestBase):
         self.mock_api.reset_mock()
         assert self.run_in_loop(obj.toggle_automatic_stop, True) is False
         self.mock_api.assert_not_called()
+
+    def test_neoclassic_nightlight_color_temp_with_brightness(self):
+        """Color temp and brightness go in one call and update both states."""
+        obj = self.get_device("humidifiers", "LUH-N611S-WUSR")
+        self.mock_api.return_value = (build_bypass_v2_response(), 200)
+        assert self.run_in_loop(obj.set_nightlight_color_temp, 3000, 40) is True
+        payload = parse_args(self.mock_api)["json_object"]["payload"]
+        assert payload["method"] == "setLightStatus"
+        assert payload["data"] == {
+            "nightLightSwitch": 1,
+            "brightness": 40,
+            "colorTemperature": 3000,
+        }
+        assert obj.state.nightlight_brightness == 40
+        assert obj.state.nightlight_color_temp == 3000
+
+    def test_neoclassic_nightlight_color_temp_rejects_bad_brightness(self):
+        """An out-of-range brightness is rejected without an API call."""
+        obj = self.get_device("humidifiers", "LUH-N611S-WUSR")
+        self.mock_api.reset_mock()
+        assert self.run_in_loop(obj.set_nightlight_color_temp, 3000, 0) is False
+        self.mock_api.assert_not_called()
