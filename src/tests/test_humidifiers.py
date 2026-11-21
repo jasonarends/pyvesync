@@ -27,6 +27,7 @@ See Also
 """
 
 import logging
+from copy import deepcopy
 from dataclasses import asdict
 import pytest
 import pyvesync.const as const
@@ -428,3 +429,34 @@ class TestHumidifiers(TestBase):
         self.mock_api.reset_mock()
         assert self.run_in_loop(obj.set_nightlight_color_temp, 3000, 0) is False
         self.mock_api.assert_not_called()
+
+    def _neoclassic_off_rejected_then_details(self, lamp_on: bool):
+        """Mocks a "not supported" reply to the off call, then a details read."""
+        details = deepcopy(call_json_humidifiers.HUMIDIFIER_DETAILS["LUH-N611S-WUSR"])
+        details["nightLight"]["nightLightSwitch"] = int(lamp_on)
+        self.mock_api.side_effect = [
+            (build_bypass_v2_response(inner_code=11017000), 200),
+            (build_bypass_v2_response(inner_result=details), 200),
+        ]
+
+    def test_neoclassic_nightlight_off_when_already_off_succeeds(self):
+        """An off call the device rejects counts as done once a re-read shows the lamp off."""
+        obj = self.get_device("humidifiers", "LUH-N611S-WUSR")
+        self._neoclassic_off_rejected_then_details(lamp_on=False)
+        assert self.run_in_loop(obj.toggle_nightlight, False) is True
+        assert self.mock_api.call_count == 2
+        assert obj.state.nightlight_status == const.DeviceStatus.OFF
+
+    def test_neoclassic_nightlight_off_rejected_while_on_fails(self):
+        """A rejected off call still fails when the re-read shows the lamp on."""
+        obj = self.get_device("humidifiers", "LUH-N611S-WUSR")
+        self._neoclassic_off_rejected_then_details(lamp_on=True)
+        assert self.run_in_loop(obj.toggle_nightlight, False) is False
+
+    def test_neoclassic_nightlight_on_rejected_fails_without_reread(self):
+        """Only off calls get the re-read; a rejected on call fails straight away."""
+        obj = self.get_device("humidifiers", "LUH-N611S-WUSR")
+        self.mock_api.reset_mock()
+        self.mock_api.return_value = (build_bypass_v2_response(inner_code=11017000), 200)
+        assert self.run_in_loop(obj.toggle_nightlight, True) is False
+        assert self.mock_api.call_count == 1

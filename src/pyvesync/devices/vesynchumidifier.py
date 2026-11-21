@@ -1836,7 +1836,16 @@ class NeoClassic650s(BypassV2Mixin, VeSyncHumidifier):
         r_dict = await self.call_bypassv2_api('setLightStatus', payload_data)
         r = Helpers.process_dev_response(logger, 'toggle_nightlight', self, r_dict)
         if r is None:
-            return False
+            # The device answers "not supported" to turning off a lamp that's
+            # already off, including when powering the unit off just switched
+            # the lamp off with it. Re-read rather than assume, so a lamp that
+            # really stayed on still reports failure.
+            if toggle or self.last_response is None:
+                return False
+            if self.last_response.name != 'BYPASS_NOT_SUPPORTED':
+                return False
+            await self.get_details()
+            return self.state.nightlight_status == DeviceStatus.OFF
 
         self.state.nightlight_status = DeviceStatus.from_bool(toggle)
         self.state.connection_status = ConnectionStatus.ONLINE
