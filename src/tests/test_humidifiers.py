@@ -470,3 +470,5 @@ class TestHumidifiers(TestBase):
             (None, 500),
         ]
         assert self.run_in_loop(obj.toggle_nightlight, False) is False
+        assert self.mock_api.call_count == 2
+        assert obj.state.nightlight_status == const.DeviceStatus.UNKNOWN
