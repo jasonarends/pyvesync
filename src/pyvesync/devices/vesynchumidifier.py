@@ -1840,10 +1840,14 @@ class NeoClassic650s(BypassV2Mixin, VeSyncHumidifier):
             # already off, including when powering the unit off just switched
             # the lamp off with it. Re-read rather than assume, so a lamp that
             # really stayed on still reports failure.
-            if toggle or self.last_response is None:
+            if (
+                toggle
+                or self.last_response is None
+                or self.last_response.name != 'BYPASS_NOT_SUPPORTED'
+            ):
                 return False
-            if self.last_response.name != 'BYPASS_NOT_SUPPORTED':
-                return False
+            # Only a successful read can set OFF again.
+            self.state.nightlight_status = DeviceStatus.UNKNOWN
             await self.get_details()
             return self.state.nightlight_status == DeviceStatus.OFF
 

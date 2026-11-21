@@ -460,3 +460,13 @@ class TestHumidifiers(TestBase):
         self.mock_api.return_value = (build_bypass_v2_response(inner_code=11017000), 200)
         assert self.run_in_loop(obj.toggle_nightlight, True) is False
         assert self.mock_api.call_count == 1
+
+    def test_neoclassic_nightlight_off_fails_when_reread_fails(self):
+        """A rejected off call fails if the re-read doesn't come back, whatever the old state."""
+        obj = self.get_device("humidifiers", "LUH-N611S-WUSR")
+        obj.state.nightlight_status = const.DeviceStatus.OFF
+        self.mock_api.side_effect = [
+            (build_bypass_v2_response(inner_code=11017000), 200),
+            (None, 500),
+        ]
+        assert self.run_in_loop(obj.toggle_nightlight, False) is False
